@@ -1,17 +1,30 @@
 # TransitOps Fleet Management System
 
-TransitOps is a MERN-based fleet and transport operations dashboard. It helps track vehicles, drivers, trips, fuel usage, expenses, maintenance activity, operational reports, and dashboard KPIs from a React frontend backed by an Express and MongoDB API.
+TransitOps is a MERN-based fleet and transport operations dashboard. It includes a Node.js/Express API with MongoDB persistence, JWT authentication, role-based access control, and a React/Vite frontend connected to the backend APIs.
 
 ## Features
 
-- Fleet dashboard with vehicle, trip, driver, utilization, and report metrics
-- Vehicle management with add, edit, list, update, and delete flows
-- Driver, trip, fuel, expense, and maintenance API modules
-- Maintenance closing workflow
-- Operational report API for fleet count, driver count, fuel cost, expense cost, and total operational cost
-- React Router based frontend pages for dashboard, vehicles, add/edit vehicle, reports, and not found states
+- JWT-based register and login APIs
+- Role-based access control for fleet, safety, driver, and finance workflows
+- API-connected dashboard metrics
+- Vehicle listing, creation, editing, and deletion
+- Driver, trip, fuel, expense, maintenance, dashboard, and report backend modules
+- Operational report summary for vehicles, drivers, fuel cost, expenses, and total cost
+- React Router pages for dashboard, vehicles, add/edit vehicle, reports, and not found states
 
 ## Tech Stack
+
+### Backend
+
+- Node.js
+- Express
+- MongoDB
+- Mongoose
+- JSON Web Token
+- bcryptjs
+- CORS
+- dotenv
+- Nodemon
 
 ### Frontend
 
@@ -20,15 +33,7 @@ TransitOps is a MERN-based fleet and transport operations dashboard. It helps tr
 - React Router
 - Tailwind CSS
 - React Icons
-- Axios
-
-### Backend
-
-- Node.js
-- Express
-- MongoDB
-- Mongoose
-- Nodemon
+- Fetch API
 
 ## Project Structure
 
@@ -36,7 +41,9 @@ TransitOps is a MERN-based fleet and transport operations dashboard. It helps tr
 odoo/
   backend/
     config/
+    constants/
     controllers/
+    middleware/
     models/
     routes/
     .env.example
@@ -56,15 +63,13 @@ odoo/
 
 ## Prerequisites
 
-Install these before running the project:
-
 - Node.js
 - npm
-- MongoDB Atlas account or a local MongoDB server
+- MongoDB Atlas connection string or a local MongoDB server
 
-## Environment Variables
+## Backend Environment Variables
 
-Create a `.env` file inside the `backend` folder. You can copy the sample file:
+Create `backend/.env` from the example file.
 
 PowerShell:
 
@@ -80,12 +85,28 @@ cd backend
 cp .env.example .env
 ```
 
-Configure the values:
+Configure:
 
 ```env
 PORT=5000
 DB_URL=your_mongodb_connection_url
 CLIENT_URL=http://localhost:5173
+JWT_SECRET=your_jwt_secret
+JWT_EXPIRE=7d
+```
+
+## Frontend Environment Variables
+
+The frontend defaults to:
+
+```text
+http://localhost:5000/api
+```
+
+Optionally create `frontend/.env` if the backend runs somewhere else:
+
+```env
+VITE_API_URL=http://localhost:5000/api
 ```
 
 ## Installation
@@ -104,35 +125,29 @@ cd ../frontend
 npm install
 ```
 
-Note: the frontend code imports `axios`. If it is missing after install, add it with:
+## Running Locally
 
-```bash
-npm install axios
-```
-
-## Running the Application
-
-Start the backend server:
+Start the backend:
 
 ```bash
 cd backend
 npm run dev
 ```
 
-The backend runs on:
+Backend URL:
 
 ```text
 http://localhost:5000
 ```
 
-Start the frontend development server in another terminal:
+Start the frontend in another terminal:
 
 ```bash
 cd frontend
 npm run dev
 ```
 
-The frontend usually runs on:
+Frontend URL:
 
 ```text
 http://localhost:5173
@@ -140,39 +155,82 @@ http://localhost:5173
 
 ## Available Scripts
 
-### Backend
+Backend:
 
 ```bash
 npm run dev
 ```
 
-Starts the Express API with Nodemon.
-
-### Frontend
+Frontend:
 
 ```bash
 npm run dev
-```
-
-Starts the Vite development server.
-
-```bash
 npm run build
-```
-
-Creates a production build.
-
-```bash
 npm run preview
-```
-
-Previews the production build locally.
-
-```bash
 npm run lint
 ```
 
-Runs ESLint checks.
+## Authentication
+
+The backend uses JWT bearer tokens.
+
+Public auth endpoints:
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| POST | `/api/auth/register` | Register a user. Public registration creates a default `Driver` user. |
+| POST | `/api/auth/login` | Login and receive a JWT token. |
+
+Protected user creation:
+
+| Method | Endpoint | Access | Description |
+| --- | --- | --- | --- |
+| POST | `/api/auth/users` | `FleetManager` | Create users with an assigned role. |
+
+Login response includes a token. Frontend API calls read the token from `localStorage.token` or `localStorage.authToken` and send it as:
+
+```http
+Authorization: Bearer <token>
+```
+
+Example login payload:
+
+```json
+{
+  "email": "manager@example.com",
+  "password": "password123"
+}
+```
+
+## Roles
+
+Supported roles:
+
+- `FleetManager`
+- `Driver`
+- `SafetyOfficer`
+- `FinancialAnalyst`
+
+RBAC summary:
+
+| Area | Roles |
+| --- | --- |
+| Dashboard | `FleetManager`, `SafetyOfficer`, `FinancialAnalyst` |
+| Vehicles read | `FleetManager`, `Driver`, `SafetyOfficer`, `FinancialAnalyst` |
+| Vehicles create/delete | `FleetManager` |
+| Vehicles update | `FleetManager`, `SafetyOfficer` |
+| Drivers read/update | `FleetManager`, `SafetyOfficer` |
+| Drivers create/delete | `FleetManager` |
+| Trips create | `FleetManager` |
+| Trips read | `FleetManager`, `Driver`, `SafetyOfficer` |
+| Fuel create | `FleetManager`, `Driver` |
+| Fuel read | `FleetManager`, `FinancialAnalyst` |
+| Expenses create/read/update | `FleetManager`, `FinancialAnalyst` |
+| Expenses delete | `FleetManager` |
+| Maintenance create/read/update/close | `FleetManager`, `SafetyOfficer` |
+| Maintenance read-only finance access | `FinancialAnalyst` |
+| Maintenance delete | `FleetManager` |
+| Reports | `FleetManager`, `FinancialAnalyst` |
 
 ## API Endpoints
 
@@ -182,17 +240,17 @@ Base backend URL:
 http://localhost:5000
 ```
 
-### Health Check
+### Health
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | `/health` | Check whether the API is running |
+| GET | `/health` | API health check |
 
 ### Dashboard
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | `/api/dashboard` | Get dashboard KPI metrics |
+| GET | `/api/dashboard` | Get KPI metrics |
 
 ### Vehicles
 
@@ -287,11 +345,37 @@ http://localhost:5000
 }
 ```
 
-## Current Development Notes
+## Frontend Pages
 
-- The dashboard page currently contains placeholder frontend stats while backend dashboard metrics are available at `/api/dashboard`.
-- Some frontend service methods reference report and vehicle helper endpoints that are not yet implemented in the backend.
-- `axios` appears in frontend source files and package lock data, so ensure it is present in `frontend/package.json` before fresh installs or deployment.
+- `/` fetches dashboard and report summaries.
+- `/vehicles` fetches vehicles and supports delete.
+- `/vehicles/add` creates a vehicle.
+- `/vehicles/edit/:id` fetches and updates a vehicle.
+- `/reports` fetches operational report and vehicle summary data.
+
+## Verification
+
+Frontend checks:
+
+```bash
+cd frontend
+npm run lint
+npm run build
+```
+
+Backend syntax checks can be run with:
+
+```bash
+cd backend
+node --check server.js
+```
+
+## Notes
+
+- Protected API calls require a valid JWT in local storage under `token` or `authToken`.
+- The current frontend does not include login/register pages yet.
+- The frontend uses the browser Fetch API, not Axios.
+- `CLIENT_URL` is defined for environment configuration, but CORS is currently enabled globally in the backend.
 
 ## License
 
