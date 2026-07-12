@@ -1,12 +1,12 @@
-import express from "express";
-import {
-addFuel,
-getFuel
-} from "../controllers/fuelController.js";
-
+const express = require("express");
 const router = express.Router();
 
-router.post("/",addFuel);
-router.get("/",getFuel);
+const {
+  addFuel,
+  getFuel,
+} = require("../controllers/fuelController");
 
-export default router;
+router.post("/", addFuel);
+router.get("/", getFuel);
+
+module.exports = router;

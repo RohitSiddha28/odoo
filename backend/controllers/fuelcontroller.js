@@ -1,11 +1,34 @@
-import Fuel from "../models/Fuel.js";
+const Fuel = require("../models/Fuel");
 
-export const addFuel = async(req,res)=>{
+exports.addFuel = async (req, res) => {
+  try {
     const fuel = await Fuel.create(req.body);
-    res.json(fuel);
+
+    res.status(201).json({
+      success: true,
+      message: "Fuel log added successfully",
+      fuel,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
 
-export const getFuel = async(req,res)=>{
+exports.getFuel = async (req, res) => {
+  try {
     const fuel = await Fuel.find().populate("tripId");
-    res.json(fuel);
+
+    res.status(200).json({
+      success: true,
+      fuel,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 };
