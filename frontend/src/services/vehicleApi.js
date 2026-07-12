@@ -1,49 +1,53 @@
-import axios from "axios";
-
-const API = axios.create({
-  baseURL: "http://localhost:5000/api/vehicles",
-});
+import { apiRequest } from "./apiClient";
 
 // Get all vehicles
 export const getVehicles = async () => {
-  return await API.get("/");
+  return await apiRequest("/vehicles");
 };
 
 // Get vehicle by ID
 export const getVehicleById = async (id) => {
-  return await API.get(`/${id}`);
+  return await apiRequest(`/vehicles/${id}`);
 };
 
 // Create vehicle
 export const createVehicle = async (vehicleData) => {
-  return await API.post("/", vehicleData);
+  return await apiRequest("/vehicles", {
+    method: "POST",
+    body: JSON.stringify(vehicleData),
+  });
 };
 
 // Update vehicle
 export const updateVehicle = async (id, vehicleData) => {
-  return await API.put(`/${id}`, vehicleData);
+  return await apiRequest(`/vehicles/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(vehicleData),
+  });
 };
 
 // Delete vehicle
 export const deleteVehicle = async (id) => {
-  return await API.delete(`/${id}`);
+  return await apiRequest(`/vehicles/${id}`, {
+    method: "DELETE",
+  });
 };
 
 // Update vehicle status
 export const updateVehicleStatus = async (id, status) => {
-  return await API.patch(`/${id}/status`, {
-    status,
+  return await apiRequest(`/vehicles/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
   });
 };
 
 // Search vehicles
 export const searchVehicles = async (keyword) => {
-  return await API.get(`/search?keyword=${keyword}`);
+  return await apiRequest(`/vehicles/search?keyword=${encodeURIComponent(keyword)}`);
 };
 
 // Filter vehicles
 export const filterVehicles = async (params) => {
-  return await API.get("/", {
-    params,
-  });
+  const searchParams = new URLSearchParams(params).toString();
+  return await apiRequest(`/vehicles${searchParams ? `?${searchParams}` : ""}`);
 };

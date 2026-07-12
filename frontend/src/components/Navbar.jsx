@@ -1,4 +1,3 @@
-import React from "react";
 import { FaBell, FaSearch, FaUserCircle } from "react-icons/fa";
 
 const Navbar = () => {

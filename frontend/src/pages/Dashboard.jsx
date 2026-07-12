@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   FaTruck,
   FaCheckCircle,
@@ -14,84 +14,118 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import StatCard from "../components/StatCard";
 import ReportCard from "../components/ReportCard";
+import { getDashboardReport, getOperationalReport } from "../services/reportApi";
+
+const formatCurrency = (value) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0);
 
 const Dashboard = () => {
-  // Dummy data (Replace with API later)
+  const [dashboard, setDashboard] = useState(null);
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const stats = [
-    {
-      title: "Active Vehicles",
-      value: 24,
-      icon: <FaTruck />,
-      color: "blue",
-      change: "+2 Today",
-    },
-    {
-      title: "Available",
-      value: 18,
-      icon: <FaCheckCircle />,
-      color: "green",
-      change: "75%",
-    },
-    {
-      title: "In Shop",
-      value: 4,
-      icon: <FaTools />,
-      color: "yellow",
-      change: "Scheduled",
-    },
-    {
-      title: "On Trip",
-      value: 12,
-      icon: <FaRoute />,
-      color: "purple",
-      change: "Running",
-    },
-  ];
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setError("");
+        const [dashboardRes, reportRes] = await Promise.all([
+          getDashboardReport(),
+          getOperationalReport(),
+        ]);
 
-  const reports = [
-    {
-      title: "Fuel Efficiency",
-      value: "12.4 km/L",
-      subtitle: "Average",
-      icon: <FaGasPump />,
-      color: "green",
-    },
-    {
-      title: "Operational Cost",
-      value: "₹1,25,000",
-      subtitle: "Fuel + Maintenance",
-      icon: <FaMoneyBillWave />,
-      color: "red",
-    },
-    {
-      title: "Fleet Utilization",
-      value: "82%",
-      subtitle: "Vehicles in use",
-      icon: <FaChartPie />,
-      color: "blue",
-    },
-    {
-      title: "ROI",
-      value: "23%",
-      subtitle: "Vehicle Return",
-      icon: <FaChartLine />,
-      color: "purple",
-    },
-  ];
+        setDashboard(dashboardRes.dashboard);
+        setReport(reportRes.report);
+      } catch (err) {
+        setError(err.message || "Failed to load dashboard data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const stats = useMemo(
+    () => [
+      {
+        title: "Active Vehicles",
+        value: dashboard?.activeVehicles ?? 0,
+        icon: <FaTruck />,
+        color: "blue",
+        change: "On trip",
+      },
+      {
+        title: "Available",
+        value: dashboard?.availableVehicles ?? 0,
+        icon: <FaCheckCircle />,
+        color: "green",
+        change: "Ready",
+      },
+      {
+        title: "In Shop",
+        value: dashboard?.vehiclesInMaintenance ?? 0,
+        icon: <FaTools />,
+        color: "yellow",
+        change: "Maintenance",
+      },
+      {
+        title: "Active Trips",
+        value: dashboard?.activeTrips ?? 0,
+        icon: <FaRoute />,
+        color: "purple",
+        change: `${dashboard?.pendingTrips ?? 0} pending`,
+      },
+    ],
+    [dashboard]
+  );
+
+  const reports = useMemo(
+    () => [
+      {
+        title: "Fuel Cost",
+        value: formatCurrency(report?.totalFuelCost),
+        subtitle: "Total fuel spend",
+        icon: <FaGasPump />,
+        color: "green",
+      },
+      {
+        title: "Operational Cost",
+        value: formatCurrency(report?.totalOperationalCost),
+        subtitle: "Fuel + expenses",
+        icon: <FaMoneyBillWave />,
+        color: "red",
+      },
+      {
+        title: "Fleet Utilization",
+        value: `${dashboard?.fleetUtilization ?? 0}%`,
+        subtitle: "Vehicles currently active",
+        icon: <FaChartPie />,
+        color: "blue",
+      },
+      {
+        title: "Total Drivers",
+        value: report?.totalDrivers ?? 0,
+        subtitle: `${dashboard?.driversOnDuty ?? 0} on duty`,
+        icon: <FaChartLine />,
+        color: "purple",
+      },
+    ],
+    [dashboard, report]
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-100">
-      {/* Sidebar */}
       <Sidebar />
 
-      {/* Main Content */}
       <div className="flex-1">
         <Navbar />
 
         <div className="p-6">
-
-          {/* Page Heading */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-800">
               Dashboard
@@ -102,11 +136,22 @@ const Dashboard = () => {
             </p>
           </div>
 
-          {/* KPI Cards */}
+          {error && (
+            <div className="mb-6 rounded-lg bg-red-50 px-4 py-3 text-red-700">
+              {error}
+            </div>
+          )}
+
+          {loading && (
+            <div className="mb-6 rounded-lg bg-white px-4 py-3 text-gray-600 shadow-sm">
+              Loading dashboard data...
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-            {stats.map((item, index) => (
+            {stats.map((item) => (
               <StatCard
-                key={index}
+                key={item.title}
                 title={item.title}
                 value={item.value}
                 icon={item.icon}
@@ -116,15 +161,14 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Reports */}
           <h2 className="text-2xl font-semibold mb-5">
             Fleet Reports
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-10">
-            {reports.map((item, index) => (
+            {reports.map((item) => (
               <ReportCard
-                key={index}
+                key={item.title}
                 title={item.title}
                 value={item.value}
                 subtitle={item.subtitle}
@@ -134,7 +178,6 @@ const Dashboard = () => {
             ))}
           </div>
 
-          {/* Placeholder for Charts */}
           <div className="bg-white rounded-xl shadow-md p-8">
             <h2 className="text-2xl font-semibold mb-4">
               Fleet Analytics
@@ -142,11 +185,10 @@ const Dashboard = () => {
 
             <div className="h-72 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
               <p className="text-gray-500 text-lg">
-                Charts will be displayed here (Recharts)
+                Live chart visualizations can be added once chart endpoints are available.
               </p>
             </div>
           </div>
-
         </div>
       </div>
     </div>
