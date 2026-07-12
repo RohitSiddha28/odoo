@@ -1,7 +1,9 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const connectDB = require("./config/db");
 const dotenv = require("dotenv");
+
+const authRoutes = require("./routes/authRoutes");
+
 dotenv.config();
 
 const app = express();
@@ -11,6 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 
 connectDB();
 
+// Routes
+app.use("/api/auth", authRoutes);
 app.use("/api/trips", require("./routes/tripRoutes"));
 app.use("/api/fuel", require("./routes/fuelRoutes"));
 app.use("/api/drivers", require("./routes/driverRoutes"));
