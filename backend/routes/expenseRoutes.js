@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { protect, authorize } = require("../middleware/authMiddleware");
+const ROLES = require("../constants/roles");
 const {
     createExpense,
     getExpenses,
@@ -9,13 +11,34 @@ const {
     deleteExpense
 } = require("../controllers/expenseController");
 
-router.post("/", createExpense);
+router.post(
+    "/",
+    protect,
+    authorize(ROLES.FLEET_MANAGER, ROLES.FINANCIAL_ANALYST),
+    createExpense
+);
 
-router.get("/", getExpenses);
-router.get("/:id", getExpenseById);
+router.get(
+    "/",
+    protect,
+    authorize(ROLES.FLEET_MANAGER, ROLES.FINANCIAL_ANALYST),
+    getExpenses
+);
 
-router.put("/:id", updateExpense);
+router.get(
+    "/:id",
+    protect,
+    authorize(ROLES.FLEET_MANAGER, ROLES.FINANCIAL_ANALYST),
+    getExpenseById
+);
 
-router.delete("/:id", deleteExpense);
+router.put(
+    "/:id",
+    protect,
+    authorize(ROLES.FLEET_MANAGER, ROLES.FINANCIAL_ANALYST),
+    updateExpense
+);
+
+router.delete("/:id", protect, authorize(ROLES.FLEET_MANAGER), deleteExpense);
 
 module.exports = router;
