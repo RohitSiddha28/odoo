@@ -1,6 +1,6 @@
-import Trip from "../models/Trip.js";
+const Trip = require("../models/Trip");
 
-export const createTrip = async (req, res) => {
+exports.createTrip = async (req, res) => {
   try {
     const trip = await Trip.create(req.body);
 
@@ -17,7 +17,7 @@ export const createTrip = async (req, res) => {
   }
 };
 
-export const getTrips = async (req, res) => {
+exports.getTrips = async (req, res) => {
   try {
     const trips = await Trip.find();
 
@@ -31,4 +31,4 @@ export const getTrips = async (req, res) => {
       message: error.message,
     });
   }
-};git status
+};
