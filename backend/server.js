@@ -11,6 +11,15 @@ app.use(express.urlencoded({ extended: true }));
 
 connectDB();
 
+const cors = require('cors');
+
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173', // your Vite dev server
+    credentials: true,
+  })
+);
+
 app.use("/api/trips", require("./routes/tripRoutes"));
 app.use("/api/fuel", require("./routes/fuelRoutes"));
 app.use("/api/drivers", require("./routes/driverRoutes"));
