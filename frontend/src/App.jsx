@@ -6,12 +6,16 @@ import AddVehicle from "./pages/AddVehicle";
 import EditVehicle from "./pages/EditVehicle";
 import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Dashboard />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/vehicles" element={<Vehicles />} />
         <Route path="/vehicles/add" element={<AddVehicle />} />
         <Route path="/vehicles/edit/:id" element={<EditVehicle />} />
