@@ -1,23 +1,15 @@
-const Vehicle = require("../models/Vehicle");
+const Driver = require("../models/Driver");
 
-// Create Vehicle
-exports.createVehicle = async (req, res) => {
+// Create Driver
+exports.createDriver = async (req, res) => {
     try {
-        const vehicle = await Vehicle.create(req.body);
+        const driver = await Driver.create(req.body);
 
         res.status(201).json({
             success: true,
-            message: "Vehicle created successfully",
-            vehicle
+            driver
         });
     } catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({
-                success: false,
-                message: "Registration number already exists"
-            });
-        }
-
         res.status(500).json({
             success: false,
             message: err.message
@@ -25,15 +17,14 @@ exports.createVehicle = async (req, res) => {
     }
 };
 
-// Get All Vehicles
-exports.getVehicles = async (req, res) => {
+// Get All Drivers
+exports.getDrivers = async (req, res) => {
     try {
-        const vehicles = await Vehicle.find();
+        const drivers = await Driver.find();
 
         res.status(200).json({
             success: true,
-            count: vehicles.length,
-            vehicles
+            drivers
         });
     } catch (err) {
         res.status(500).json({
@@ -43,21 +34,21 @@ exports.getVehicles = async (req, res) => {
     }
 };
 
-// Get Vehicle by ID
-exports.getVehicleById = async (req, res) => {
+// Get Driver by ID
+exports.getDriverById = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findById(req.params.id);
+        const driver = await Driver.findById(req.params.id);
 
-        if (!vehicle) {
+        if (!driver) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Driver not found"
             });
         }
 
         res.status(200).json({
             success: true,
-            vehicle
+            driver
         });
     } catch (err) {
         res.status(500).json({
@@ -67,29 +58,25 @@ exports.getVehicleById = async (req, res) => {
     }
 };
 
-// Update Vehicle
-exports.updateVehicle = async (req, res) => {
+// Update Driver
+exports.updateDriver = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findByIdAndUpdate(
+        const driver = await Driver.findByIdAndUpdate(
             req.params.id,
             req.body,
-            {
-                new: true,
-                runValidators: true
-            }
+            { new: true, runValidators: true }
         );
 
-        if (!vehicle) {
+        if (!driver) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Driver not found"
             });
         }
 
         res.status(200).json({
             success: true,
-            message: "Vehicle updated successfully",
-            vehicle
+            driver
         });
     } catch (err) {
         res.status(500).json({
@@ -99,21 +86,21 @@ exports.updateVehicle = async (req, res) => {
     }
 };
 
-// Delete Vehicle
-exports.deleteVehicle = async (req, res) => {
+// Delete Driver
+exports.deleteDriver = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
+        const driver = await Driver.findByIdAndDelete(req.params.id);
 
-        if (!vehicle) {
+        if (!driver) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Driver not found"
             });
         }
 
         res.status(200).json({
             success: true,
-            message: "Vehicle deleted successfully"
+            message: "Driver deleted successfully"
         });
     } catch (err) {
         res.status(500).json({

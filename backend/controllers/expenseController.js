@@ -1,23 +1,15 @@
-const Vehicle = require("../models/Vehicle");
+const Expense = require("../models/Expense");
 
-// Create Vehicle
-exports.createVehicle = async (req, res) => {
+// Create Expense
+exports.createExpense = async (req, res) => {
     try {
-        const vehicle = await Vehicle.create(req.body);
+        const expense = await Expense.create(req.body);
 
         res.status(201).json({
             success: true,
-            message: "Vehicle created successfully",
-            vehicle
+            expense
         });
     } catch (err) {
-        if (err.code === 11000) {
-            return res.status(400).json({
-                success: false,
-                message: "Registration number already exists"
-            });
-        }
-
         res.status(500).json({
             success: false,
             message: err.message
@@ -25,15 +17,16 @@ exports.createVehicle = async (req, res) => {
     }
 };
 
-// Get All Vehicles
-exports.getVehicles = async (req, res) => {
+// Get All Expenses
+exports.getExpenses = async (req, res) => {
     try {
-        const vehicles = await Vehicle.find();
+        const expenses = await Expense.find()
+            .populate("vehicle")
+            .populate("trip");
 
         res.status(200).json({
             success: true,
-            count: vehicles.length,
-            vehicles
+            expenses
         });
     } catch (err) {
         res.status(500).json({
@@ -43,21 +36,23 @@ exports.getVehicles = async (req, res) => {
     }
 };
 
-// Get Vehicle by ID
-exports.getVehicleById = async (req, res) => {
+// Get Expense by ID
+exports.getExpenseById = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findById(req.params.id);
+        const expense = await Expense.findById(req.params.id)
+            .populate("vehicle")
+            .populate("trip");
 
-        if (!vehicle) {
+        if (!expense) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Expense not found"
             });
         }
 
         res.status(200).json({
             success: true,
-            vehicle
+            expense
         });
     } catch (err) {
         res.status(500).json({
@@ -67,29 +62,25 @@ exports.getVehicleById = async (req, res) => {
     }
 };
 
-// Update Vehicle
-exports.updateVehicle = async (req, res) => {
+// Update Expense
+exports.updateExpense = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findByIdAndUpdate(
+        const expense = await Expense.findByIdAndUpdate(
             req.params.id,
             req.body,
-            {
-                new: true,
-                runValidators: true
-            }
+            { new: true, runValidators: true }
         );
 
-        if (!vehicle) {
+        if (!expense) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Expense not found"
             });
         }
 
         res.status(200).json({
             success: true,
-            message: "Vehicle updated successfully",
-            vehicle
+            expense
         });
     } catch (err) {
         res.status(500).json({
@@ -99,21 +90,21 @@ exports.updateVehicle = async (req, res) => {
     }
 };
 
-// Delete Vehicle
-exports.deleteVehicle = async (req, res) => {
+// Delete Expense
+exports.deleteExpense = async (req, res) => {
     try {
-        const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
+        const expense = await Expense.findByIdAndDelete(req.params.id);
 
-        if (!vehicle) {
+        if (!expense) {
             return res.status(404).json({
                 success: false,
-                message: "Vehicle not found"
+                message: "Expense not found"
             });
         }
 
         res.status(200).json({
             success: true,
-            message: "Vehicle deleted successfully"
+            message: "Expense deleted successfully"
         });
     } catch (err) {
         res.status(500).json({
