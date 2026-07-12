@@ -10,7 +10,9 @@ app.use(express.json());
 app.use("/api/trips", require("./routes/tripRoutes"));
 app.use("/api/fuel", require("./routes/fuelRoutes"));
 app.use("/api/drivers", require("./routes/driverRoutes"));
-// app.use("/api/expenses", require("./routes/expenseRoutes"));
+app.use("/api/vehicles", require("./routes/vehicleRoutes"));
+app.use("/api/reports", require("./routes/reportRoutes"));
+app.use("/api/expenses", require("./routes/expenseRoutes"));
 
 app.get("/health", (req, res) => {
   res.send("API is up and running");
