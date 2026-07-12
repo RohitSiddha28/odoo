@@ -1,7 +1,7 @@
 const Vehicle = require("../models/Vehicle");
 const Driver = require("../models/Driver");
-const Trip = require("../models/trip");
-const FuelLog = require("../models/fuel");
+const Trip = require("../models/Trip");
+const FuelLog = require("../models/Fuel");
 const Expense = require("../models/Expense");
 
 exports.getReport = async (req, res) => {

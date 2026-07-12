@@ -1,4 +1,4 @@
-const Fuel = require("../models/Fuel");
+const Fuel = require("../models/Fuel.js");
 
 exports.addFuel = async (req, res) => {
   try {
