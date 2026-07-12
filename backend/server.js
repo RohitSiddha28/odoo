@@ -1,11 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const connectDB = require("./config/db");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// mongoose.connect(process.env.DB_URL);
+connectDB();
 
 app.use("/api/trips", require("./routes/tripRoutes"));
 app.use("/api/fuel", require("./routes/fuelRoutes"));
