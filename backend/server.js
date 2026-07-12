@@ -13,6 +13,8 @@ app.use("/api/drivers", require("./routes/driverRoutes"));
 app.use("/api/vehicles", require("./routes/vehicleRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/expenses", require("./routes/expenseRoutes"));
+app.use("/api/maintenance", require("./routes/maintenanceRoutes"));
+app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 
 app.get("/health", (req, res) => {
   res.send("API is up and running");
